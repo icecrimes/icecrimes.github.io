@@ -3,18 +3,18 @@
   const normalizedEl = document.getElementById('normalized');
   const morseEl = document.getElementById('morseOutput');
   const copyBtn = document.getElementById('copyMorseBtn');
-
+  
   const latinToMorse = new Map(Object.entries({
     // Letters
-    'A': '.-',    'B': '-...',  'C': '-.-.',  'D': '-..',   'E': '.',
-    'F': '..-.',  'G': '--.',   'H': '....',  'I': '..',    'J': '.---',
-    'K': '-.-',   'L': '.-..',  'M': '--',    'N': '-.',    'O': '---',
-    'P': '.--.',  'Q': '--.-',  'R': '.-.',   'S': '...',   'T': '-',
-    'U': '..-',   'V': '...-',  'W': '.--',   'X': '-..-',  'Y': '-.--',
-    'Z': '--..', '¤': '----', 
+    'A': '∙−',    'B': '−∙∙∙',  'C': '−∙−∙',  'D': '−∙∙',   'E': '∙',
+    'F': '∙∙−∙',  'G': '−−∙',   'H': '∙∙∙∙',  'I': '∙∙',    'J': '∙−−−',
+    'K': '−∙−',   'L': '∙−∙∙',  'M': '−−',    'N': '−∙',    'O': '−−−',
+    'P': '∙−−∙',  'Q': '−−∙−',  'R': '∙−∙',   'S': '∙∙∙',   'T': '−',
+    'U': '∙∙−',   'V': '∙∙∙−',  'W': '∙−−',   'X': '−∙∙−',  'Y': '−∙−−',
+    'Z': '−−∙∙', '¤': '−−−−', 
     // Digits
-    '0': '-----', '1': '.----', '2': '..---', '3': '...--', '4': '....-',
-    '5': '.....', '6': '-....', '7': '--...', '8': '---..', '9': '----.',
+    '0': '−−−−−', '1': '∙−−−−', '2': '∙∙−−−', '3': '∙∙∙−−', '4': '∙∙∙∙−',
+    '5': '∙∙∙∙∙', '6': '−∙∙∙∙', '7': '−−∙∙∙', '8': '−−−∙∙', '9': '−−−−∙',
   }));
 
   function expandVietnameseChar(char) {
@@ -94,9 +94,9 @@
     }
 
     const normalizedText = normalizedWords.join(' ');
-    normalizedEl.value = normalizedText;
+    normalizedEl.value = normalizedText.toUpperCase();
     if (normalizedEl.value.includes('¤')) {
-      normalizedEl.value = normalizedEl.value.replace(/¤/g, 'ch');
+      normalizedEl.value = normalizedEl.value.replace(/¤/g, 'CH');
     }
     const morse = translateToMorse(normalizedText);
     morseEl.value = morse;
