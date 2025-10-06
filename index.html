@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Traduction Morse VN → Morse</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="container">
+    <h1>Vietnamien → Morse</h1>
+    <section class="panel">
+      <label for="vnInput">Texte vietnamien</label>
+      <textarea id="vnInput" placeholder="Tapez du texte vietnamien ici..."></textarea>
+    </section>
+
+    <section class="panel">
+      <label for="normalized">Normalisé</label>
+      <textarea id="normalized" readonly></textarea>
+      <div class="hint">La normalisation convertit « đ » → « dd » et ajoute les accents à la fin du mot.</div>
+    </section>
+
+    <section class="panel">
+      <label for="morseOutput">Morse</label>
+      <textarea id="morseOutput" readonly></textarea>
+      <div class="row">
+        <button id="copyMorseBtn" type="button">Copier le Morse</button>
+      </div>
+    </section>
+
+    <footer>
+      <small>Made by IceCrimes – Supporte lettres, accents et chiffres en Vietnamien.</small>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+  
+</body>
+</html>
+
+
