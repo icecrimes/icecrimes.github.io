@@ -29,7 +29,7 @@
 
   function getLatin2Morse(char = '') {
     let retval = ''
-    retval += latinToMorse.get(char.toUpperCase());
+    retval += latinToMorse.get(char.toUpperCase()) ?? '?';
     retval += charSeparator;
     return (retval)
   }
@@ -43,7 +43,6 @@
 
     function handle_double_vowel() {
       const previousChar = normalizedText.at(-1).toUpperCase();
-      console.log(previousChar);
       if (previousChar === 'A' || previousChar === 'O' || previousChar === 'E') {
         normalizedText += previousChar;
         morseText += getLatin2Morse(previousChar);
@@ -57,16 +56,16 @@
     }
 
     function handle_crochet() {
-      const previousChar = normalizedText.at(-1);
-      if (previousChar === 'u' || previousChar === 'o') {
+      const previousChar = normalizedText.at(-1).toUpperCase();
+      if (previousChar === 'U' || previousChar === 'O') {
         normalizedText += 'W';
         morseText += getLatin2Morse('W');
       }
     }
 
     function handle_half_moon() {
-      const previousChar = normalizedText.at(-1);
-      if (previousChar === 'a') {
+      const previousChar = normalizedText.at(-1).toUpperCase();
+      if (previousChar === 'A') {
         normalizedText += 'W';
         morseText += getLatin2Morse('W');
       }
