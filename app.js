@@ -2,40 +2,43 @@
   const inputEl = document.getElementById('vnInput');
   const normalizedEl = document.getElementById('normalized');
   const morseEl = document.getElementById('morseOutput');
-  const semaphoreEl = document.getElementById('semaphoreOutput');
-  const mirrorSemaphoreEl = document.getElementById('mirrorSemaphoreOutput');
   const copyBtn = document.getElementById('copyMorseBtn');
 
+  const semaphoreEl = document.getElementById('semaphoreOutput');
+  const mirrorSemaphoreEl = document.getElementById('mirrorSemaphoreOutput');
   const includeSpacesEl = document.getElementById('includeSpaces');
   const lettersPerLineEl = document.getElementById('lettersPerLine');
   const lineBreakWordsEl = document.getElementById('lineBreakWords');
-
   const mirrorIncludeSpacesEl = document.getElementById('mirrorIncludeSpaces');
   const mirrorLettersPerLineEl = document.getElementById('mirrorLettersPerLine');
   const mirrorLineBreakWordsEl = document.getElementById('mirrorLineBreakWords');
 
   const accents = {
-    SAC:    {flag: 1 << 0, code: '\u0301', letter: 'S'},
-    HUYEN:  {flag: 1 << 1, code: '\u0300', letter: 'Q'},
-    HOI:    {flag: 1 << 2, code: '\u0309', letter: 'Z'},
-    NGA:    {flag: 1 << 3, code: '\u0303', letter: 'X'},
-    NANG:   {flag: 1 << 4, code: '\u0323', letter: 'J'},
+    SAC:    {flag: 1 << 0, code: '\u0301', letter: 'S'}, // sắc    00001
+    HUYEN:  {flag: 1 << 1, code: '\u0300', letter: 'Q'}, // huyền  00010
+    HOI:    {flag: 1 << 2, code: '\u0309', letter: 'Z'}, // hỏi    00100
+    NGA:    {flag: 1 << 3, code: '\u0303', letter: 'X'}, // ngã    01000
+    NANG:   {flag: 1 << 4, code: '\u0323', letter: 'J'}, // nặng   10000
   };
 
   const latinToMorse = new Map(Object.entries({
-    'A': '∙−','B': '−∙∙∙','C': '−∙−∙','D': '−∙∙','E': '∙',
-    'F': '∙∙−∙','G': '−−∙','H': '∙∙∙∙','I': '∙∙','J': '∙−−−',
-    'K': '−∙−','L': '∙−∙∙','M': '−−','N': '−∙','O': '−−−',
-    'P': '∙−−∙','Q': '−−∙−','R': '∙−∙','S': '∙∙∙','T': '−',
-    'U': '∙∙−','V': '∙∙∙−','W': '∙−−','X': '−∙∙−','Y': '−∙−−',
-    'Z': '−−∙∙','CH': '−−−−',
-    '0': '−−−−−','1': '∙−−−−','2': '∙∙−−−','3': '∙∙∙−−','4': '∙∙∙∙−',
-    '5': '∙∙∙∙∙','6': '−∙∙∙∙','7': '−−∙∙∙','8': '−−−∙∙','9': '−−−−∙',
+    // Letters
+    'A': '∙−',    'B': '−∙∙∙',  'C': '−∙−∙',  'D': '−∙∙',   'E': '∙',
+    'F': '∙∙−∙',  'G': '−−∙',   'H': '∙∙∙∙',  'I': '∙∙',    'J': '∙−−−',
+    'K': '−∙−',   'L': '∙−∙∙',  'M': '−−',    'N': '−∙',    'O': '−−−',
+    'P': '∙−−∙',  'Q': '−−∙−',  'R': '∙−∙',   'S': '∙∙∙',   'T': '−',
+    'U': '∙∙−',   'V': '∙∙∙−',  'W': '∙−−',   'X': '−∙∙−',  'Y': '−∙−−',
+    'Z': '−−∙∙', 'CH': '−−−−', 
+    // Digits
+    '0': '−−−−−', '1': '∙−−−−', '2': '∙∙−−−', '3': '∙∙∙−−', '4': '∙∙∙∙−',
+    '5': '∙∙∙∙∙', '6': '−∙∙∙∙', '7': '−−∙∙∙', '8': '−−−∙∙', '9': '−−−−∙',
   }));
 
   const charSeparator = '/';
-  const getLatinToMorse = (char = '') => (latinToMorse.get(char.toUpperCase()) ?? '?') + charSeparator;
-
+  
+function getLatinToMorse(char = '') {
+  return (latinToMorse.get(char.toUpperCase()) ?? '?') + charSeparator;
+}
   function generateSemaphoreHTML(text, {
     includeSpaces,
     lettersPerLine,
@@ -118,47 +121,56 @@
     const raw = inputEl.value || '';
     const lower = raw.toLowerCase();
     const words = lower.split(/\s+/).filter(Boolean);
-    let normalizedText = '';
     let morseText = '';
+    let normalizedText = '';
 
     function handleDoubleVowel() {
-      const prev = normalizedText.at(-1)?.toUpperCase();
-      if (prev === 'A' || prev === 'O' || prev === 'E') {
-        normalizedText += prev;
-        morseText += getLatinToMorse(prev);
+      const previousChar = normalizedText.at(-1).toUpperCase();
+      if (previousChar === 'A' || previousChar === 'O' || previousChar === 'E') {
+        normalizedText += previousChar;
+        morseText += getLatinToMorse(previousChar);
       }
     }
 
-    const handleDoubleD = () => {
+    function handleDoubleD() {
       normalizedText += 'DD';
-      morseText += getLatinToMorse('D') + getLatinToMorse('D');
-    };
-    const handleCrochet = () => {
-      const prev = normalizedText.at(-1)?.toUpperCase();
-      if (prev === 'U' || prev === 'O') {
+      morseText += getLatinToMorse('D');
+      morseText += getLatinToMorse('D');
+    }
+
+    function handleCrochet() {
+      const previousChar = normalizedText.at(-1).toUpperCase();
+      if (previousChar === 'U' || previousChar === 'O') {
         normalizedText += 'W';
         morseText += getLatinToMorse('W');
       }
-    };
-    const handleHalfMoon = () => {
-      const prev = normalizedText.at(-1)?.toUpperCase();
-      if (prev === 'A') {
+    }
+
+    function handleHalfMoon() {
+      const previousChar = normalizedText.at(-1).toUpperCase();
+      if (previousChar === 'A') {
         normalizedText += 'W';
         morseText += getLatinToMorse('W');
       }
-    };
-    const handleCH = () => {
+    }
+
+    function handleCH() {
       normalizedText += 'CH';
       morseText += getLatinToMorse('CH');
-    };
-    const handleUOW = () => {
+    }
+
+    function handleUOW() {
       normalizedText += 'UOW';
-      morseText += getLatinToMorse('U') + getLatinToMorse('O') + getLatinToMorse('W');
-    };
-    const handleDefault = (c) => {
-      normalizedText += c.toUpperCase();
-      morseText += getLatinToMorse(c.toUpperCase());
-    };
+      morseText += getLatinToMorse('U');
+      morseText += getLatinToMorse('O');
+      morseText += getLatinToMorse('W');
+    }
+
+    function handleDefault(char) {
+      normalizedText += char.toUpperCase();
+      morseText += getLatinToMorse(char.toUpperCase());
+    }
+
 
     for (const word of words) {
       let accent = 0;
@@ -174,7 +186,7 @@
           case 'đ':
             handleDoubleD();
             break;
-          case 'u': // 'uow'
+          case 'u':
             if (i < NFDWord.length - 3 && NFDWord[i + 1] == '\u031B' && NFDWord[i + 2] == 'o' && NFDWord[i + 3] == '\u031B') {
               handleUOW();
               i = i+3;
@@ -182,7 +194,7 @@
               handleDefault(char);
               }
               break;
-          case '\u0302': // 'â', 'ê', 'ô'
+          case '\u0302': // '^'
             handleDoubleVowel();
             break;
           case '\u031B': // 'uw' or 'ow'
@@ -203,14 +215,13 @@
         }
       }
       if (accent) {
-        const letter = Object.values(accents).find(a => accent & a.flag)?.letter;
+        let letter = Object.values(accents).find(acc => accent & acc.flag)?.letter;
         normalizedText += letter;
         morseText += getLatinToMorse(letter);
       }
       normalizedText += ' ';
       morseText += charSeparator;
     }
-
     normalizedEl.value = normalizedText.toUpperCase();
     morseEl.value = morseText;
 
@@ -218,7 +229,7 @@
     updateSemaphore(mirrorSemaphoreEl, mirrorIncludeSpacesEl, mirrorLettersPerLineEl, mirrorLineBreakWordsEl, true);
   }
   
-  // 📄 Écouteurs
+  // Event Listeners
   [inputEl, includeSpacesEl, lettersPerLineEl, lineBreakWordsEl,
    mirrorIncludeSpacesEl, mirrorLettersPerLineEl, mirrorLineBreakWordsEl]
     .forEach(el => el?.addEventListener('input', update));
