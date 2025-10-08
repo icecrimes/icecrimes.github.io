@@ -73,6 +73,13 @@ function getLatinToMorse(char = '') {
       morseText += getLatinToMorse('CH');
     }
 
+    function handleUOW() {
+      normalizedText += 'UOW';
+      morseText += getLatinToMorse('U');
+      morseText += getLatinToMorse('O');
+      morseText += getLatinToMorse('W');
+    }
+
     function handleDefault(char) {
       normalizedText += char.toUpperCase();
       morseText += getLatinToMorse(char.toUpperCase());
@@ -92,6 +99,14 @@ function getLatinToMorse(char = '') {
           case 'đ':
             handleDoubleD();
             break;
+          case 'u':
+            if (i < NFDWord.length - 3 && NFDWord[i + 1] == '\u031B' && NFDWord[i + 2] == 'o' && NFDWord[i + 3] == '\u031B') {
+              handleUOW();
+              i = i+3;
+              } else {
+              handleDefault(char);
+              }
+              break;
           case '\u0302': // '^'
             handleDoubleVowel();
             break;
