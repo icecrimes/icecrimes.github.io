@@ -27,12 +27,9 @@
 
   const charSeparator = '/';
 
-  function getLatin2Morse(char = '') {
-    let retval = ''
-    retval += latinToMorse.get(char.toUpperCase()) ?? '?';
-    retval += charSeparator;
-    return (retval)
-  }
+function getLatinToMorse(char = '') {
+  return (latinToMorse.get(char.toUpperCase()) ?? '?') + charSeparator;
+}
 
   function update() {
     const raw = inputEl.value || '';
@@ -41,44 +38,44 @@
     let morseText = '';
     let normalizedText = '';
 
-    function handle_double_vowel() {
+    function handleDoubleVowel() {
       const previousChar = normalizedText.at(-1).toUpperCase();
       if (previousChar === 'A' || previousChar === 'O' || previousChar === 'E') {
         normalizedText += previousChar;
-        morseText += getLatin2Morse(previousChar);
+        morseText += getLatinToMorse(previousChar);
       }
     }
 
-    function handle_double_d() {
+    function handleDoubleD() {
       normalizedText += 'DD';
-      morseText += getLatin2Morse('D');
-      morseText += getLatin2Morse('D');
+      morseText += getLatinToMorse('D');
+      morseText += getLatinToMorse('D');
     }
 
-    function handle_crochet() {
+    function handleCrochet() {
       const previousChar = normalizedText.at(-1).toUpperCase();
       if (previousChar === 'U' || previousChar === 'O') {
         normalizedText += 'W';
-        morseText += getLatin2Morse('W');
+        morseText += getLatinToMorse('W');
       }
     }
 
-    function handle_half_moon() {
+    function handleHalfMoon() {
       const previousChar = normalizedText.at(-1).toUpperCase();
       if (previousChar === 'A') {
         normalizedText += 'W';
-        morseText += getLatin2Morse('W');
+        morseText += getLatinToMorse('W');
       }
     }
 
-    function handle_CH() {
+    function handleCH() {
       normalizedText += 'CH';
-      morseText += getLatin2Morse('CH');
+      morseText += getLatinToMorse('CH');
     }
 
-    function handle_default(char) {
+    function handleDefault(char) {
       normalizedText += char.toUpperCase();
-      morseText += getLatin2Morse(char.toUpperCase());
+      morseText += getLatinToMorse(char.toUpperCase());
     }
 
     for (const word of words) {
@@ -86,49 +83,39 @@
       const NFDWord = word.normalize('NFD');
       for (let i = 0; i < NFDWord.length; i++) {
         const char = NFDWord[i].toLowerCase();
+        const accentMatch = Object.values(accents).find(acc => acc.code === char);
+        if (accentMatch) {
+          accent |= accentMatch.flag;
+          continue;
+        }
         switch (char) {
-          case accents.SAC.code:
-            accent |= accents.SAC.flag;
-            break;
-          case accents.HUYEN.code:
-            accent |= accents.HUYEN.flag;
-            break;
-          case accents.HOI.code:
-            accent |= accents.HOI.flag;
-            break;
-          case accents.NGA.code:
-            accent |= accents.NGA.flag;
-            break;
-          case accents.NANG.code:
-            accent |= accents.NANG.flag;
-            break;
           case 'đ':
-            handle_double_d();
+            handleDoubleD();
             break;
           case '\u0302': // '^'
-            handle_double_vowel();
+            handleDoubleVowel();
             break;
           case '\u031B': // 'uw' or 'ow'
-            handle_crochet();
+            handleCrochet();
             break;
           case '\u0306': // 'aw'
-            handle_half_moon();
+            handleHalfMoon();
             break;
           case 'c':
             if (i < NFDWord.length - 1 && NFDWord[i + 1].toLowerCase() == 'h') {
-              handle_CH();
+              handleCH();
               i++;
               break;
             } // else fallthrough
           default:
-            handle_default(char);
+            handleDefault(char);
             break;
         }
       }
       if (accent) {
         let letter = Object.values(accents).find(acc => accent & acc.flag)?.letter;
         normalizedText += letter;
-        morseText += getLatin2Morse(letter);
+        morseText += getLatinToMorse(letter);
       }
       normalizedText += ' ';
       morseText += charSeparator;
