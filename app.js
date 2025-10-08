@@ -4,6 +4,15 @@
   const morseEl = document.getElementById('morseOutput');
   const copyBtn = document.getElementById('copyMorseBtn');
 
+  const semaphoreEl = document.getElementById('semaphoreOutput');
+  const mirrorSemaphoreEl = document.getElementById('mirrorSemaphoreOutput');
+  const includeSpacesEl = document.getElementById('includeSpaces');
+  const lettersPerLineEl = document.getElementById('lettersPerLine');
+  const lineBreakWordsEl = document.getElementById('lineBreakWords');
+  const mirrorIncludeSpacesEl = document.getElementById('mirrorIncludeSpaces');
+  const mirrorLettersPerLineEl = document.getElementById('mirrorLettersPerLine');
+  const mirrorLineBreakWordsEl = document.getElementById('mirrorLineBreakWords');
+
   const accents = {
     SAC:    {flag: 1 << 0, code: '\u0301', letter: 'S'}, // sắc    00001
     HUYEN:  {flag: 1 << 1, code: '\u0300', letter: 'Q'}, // huyền  00010
@@ -26,10 +35,87 @@
   }));
 
   const charSeparator = '/';
-
+  
 function getLatinToMorse(char = '') {
   return (latinToMorse.get(char.toUpperCase()) ?? '?') + charSeparator;
 }
+  function generateSemaphoreHTML(text, {
+    includeSpaces,
+    lettersPerLine,
+    lineBreakWords,
+    mirror = false
+  } = {}) {
+    if (!text) return '';
+
+    let html = '';
+    const baseSize = 60;
+    const maxSize = 200;
+    const sizeMultiplier = Math.max(1, (10 / (lettersPerLine || 10)));
+    const imageSize = Math.min(maxSize, Math.round(baseSize * sizeMultiplier));
+    let letterCount = 0;
+    const words = text.split(' ');
+    const mirrorClass = mirror ? 'mirror' : '';
+
+    for (let wordIndex = 0; wordIndex < words.length; wordIndex++) {
+      const word = words[wordIndex];
+
+      for (let i = 0; i < word.length; i++) {
+        const char = word[i];
+        const letter = char.toUpperCase();
+
+        if (/[A-Z0-9]/.test(letter) || letter === 'CH') {
+          if (letterCount > 0 && letterCount % lettersPerLine === 0) {
+            html += '<div class="semaphore-line-break"></div>';
+          }
+
+          html += `
+            <div class="semaphore-item">
+              <img src="images/semaphore/${letter}.svg"
+                  alt="Sémaphore ${letter}"
+                  class="semaphore-image ${mirrorClass}"
+                  style="width:${imageSize}px;height:${imageSize}px;">
+              <span class="semaphore-letter">${letter}</span>
+            </div>
+          `;
+          letterCount++;
+        }
+      }
+
+      if (includeSpaces && wordIndex < words.length - 1) {
+        html += `
+          <div class="semaphore-item">
+            <img src="images/semaphore/SPACE.svg"
+                alt="Sémaphore ESPACE"
+                class="semaphore-image ${mirrorClass}"
+                style="width:${imageSize}px;height:${imageSize}px;">
+            <span class="semaphore-letter">ESP</span>
+          </div>
+        `;
+        letterCount++;
+      }
+
+      if (lineBreakWords && wordIndex < words.length - 1) {
+        html += '<div class="semaphore-line-break"></div>';
+        letterCount = 0;
+      }
+    }
+
+    return html;
+  }
+
+  function getOptionsFromElements(includeSpacesEl, lettersPerLineEl, lineBreakWordsEl, mirror) {
+    return {
+      includeSpaces: includeSpacesEl.checked,
+      lettersPerLine: parseInt(lettersPerLineEl.value),
+      lineBreakWords: lineBreakWordsEl.checked,
+      mirror
+    };
+  }
+
+  function updateSemaphore(element, includeSpacesEl, lettersPerLineEl, lineBreakWordsEl, mirror) {
+    const options = getOptionsFromElements(includeSpacesEl, lettersPerLineEl, lineBreakWordsEl, mirror);
+    element.innerHTML = generateSemaphoreHTML(normalizedEl.value, options);
+  }
 
   function update() {
     const raw = inputEl.value || '';
@@ -85,6 +171,7 @@ function getLatinToMorse(char = '') {
       morseText += getLatinToMorse(char.toUpperCase());
     }
 
+
     for (const word of words) {
       let accent = 0;
       const NFDWord = word.normalize('NFD');
@@ -137,9 +224,19 @@ function getLatinToMorse(char = '') {
     }
     normalizedEl.value = normalizedText.toUpperCase();
     morseEl.value = morseText;
-  }
 
-  inputEl.addEventListener('input', update);
+    updateSemaphore(semaphoreEl, includeSpacesEl, lettersPerLineEl, lineBreakWordsEl, false);
+    updateSemaphore(mirrorSemaphoreEl, mirrorIncludeSpacesEl, mirrorLettersPerLineEl, mirrorLineBreakWordsEl, true);
+  }
+  
+  // Event Listeners
+  [inputEl, includeSpacesEl, lettersPerLineEl, lineBreakWordsEl,
+   mirrorIncludeSpacesEl, mirrorLettersPerLineEl, mirrorLineBreakWordsEl]
+    .forEach(el => el?.addEventListener('input', update));
+  [includeSpacesEl, lettersPerLineEl, lineBreakWordsEl,
+   mirrorIncludeSpacesEl, mirrorLettersPerLineEl, mirrorLineBreakWordsEl]
+    .forEach(el => el?.addEventListener('change', update));
+
   if (copyBtn) {
     copyBtn.addEventListener('click', async () => {
       try {
@@ -147,13 +244,12 @@ function getLatinToMorse(char = '') {
         const prev = copyBtn.textContent;
         copyBtn.textContent = 'Copié !';
         setTimeout(() => { copyBtn.textContent = prev || 'Copier le Morse'; }, 1000);
-      } catch (_) {
+      } catch {
         morseEl.select();
         document.execCommand('copy');
       }
     });
   }
 
-  // initial
   update();
 })();
