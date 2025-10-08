@@ -2,7 +2,11 @@
   const inputEl = document.getElementById('vnInput');
   const normalizedEl = document.getElementById('normalized');
   const morseEl = document.getElementById('morseOutput');
+  const semaphoreEl = document.getElementById('semaphoreOutput');
   const copyBtn = document.getElementById('copyMorseBtn');
+  const includeSpacesEl = document.getElementById('includeSpaces');
+  const lettersPerLineEl = document.getElementById('lettersPerLine');
+  const lineBreakWordsEl = document.getElementById('lineBreakWords');
 
   const accents = {
     SAC:    {flag: 1 << 0, code: '\u0301', letter: 'S'}, // sắc    00001
@@ -30,6 +34,69 @@
 function getLatinToMorse(char = '') {
   return (latinToMorse.get(char.toUpperCase()) ?? '?') + charSeparator;
 }
+
+  function generateSemaphoreHTML(text) {
+    if (!text) return '';
+    
+    let html = '';
+    const includeSpaces = includeSpacesEl.checked;
+    const lettersPerLine = parseInt(lettersPerLineEl.value) || 10;
+    const lineBreakWords = lineBreakWordsEl.checked;
+    
+    // Calculer la taille des images en fonction du nombre par ligne
+    // Plus le nombre par ligne est petit, plus les images sont grandes
+    const baseSize = 60;
+    const maxSize = 200;
+    const sizeMultiplier = Math.max(1, (10 / lettersPerLine));
+    const imageSize = Math.min(maxSize, Math.round(baseSize * sizeMultiplier));
+    
+    let letterCount = 0;
+    let words = text.split(' ');
+    
+    for (let wordIndex = 0; wordIndex < words.length; wordIndex++) {
+      const word = words[wordIndex];
+      
+      for (let i = 0; i < word.length; i++) {
+        const char = word[i];
+        const letter = char.toUpperCase();
+        
+        if (/[A-Z0-9]/.test(letter) || letter === 'CH') {
+          // Ajouter un retour à la ligne si nécessaire
+          if (letterCount > 0 && letterCount % lettersPerLine === 0) {
+            html += '<div class="semaphore-line-break"></div>';
+          }
+          
+          html += `
+            <div class="semaphore-item">
+              <img src="images/semaphore/${letter}.svg" alt="Sémaphore ${letter}" class="semaphore-image" style="width: ${imageSize}px; height: ${imageSize}px;">
+              <span class="semaphore-letter">${letter}</span>
+            </div>
+          `;
+          
+          letterCount++;
+        }
+      }
+      
+      // Ajouter un espace entre les mots si l'option est activée
+      if (includeSpaces && wordIndex < words.length - 1) {
+        html += `
+          <div class="semaphore-item">
+            <img src="images/semaphore/SPACE.svg" alt="Sémaphore ESPACE" class="semaphore-image" style="width: ${imageSize}px; height: ${imageSize}px;">
+            <span class="semaphore-letter">ESP</span>
+          </div>
+        `;
+        letterCount++;
+      }
+      
+      // Ajouter un retour à la ligne après chaque mot si l'option est activée
+      if (lineBreakWords && wordIndex < words.length - 1) {
+        html += '<div class="semaphore-line-break"></div>';
+        letterCount = 0;
+      }
+    }
+    
+    return html;
+  }
 
   function update() {
     const raw = inputEl.value || '';
@@ -137,9 +204,17 @@ function getLatinToMorse(char = '') {
     }
     normalizedEl.value = normalizedText.toUpperCase();
     morseEl.value = morseText;
+    
+    // Mise à jour de l'affichage sémaphore
+    semaphoreEl.innerHTML = generateSemaphoreHTML(normalizedText);
   }
 
+  // Ajout des écouteurs d'événements
   inputEl.addEventListener('input', update);
+  includeSpacesEl.addEventListener('change', update);
+  lettersPerLineEl.addEventListener('change', update);
+  lineBreakWordsEl.addEventListener('change', update);
+  
   if (copyBtn) {
     copyBtn.addEventListener('click', async () => {
       try {
