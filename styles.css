@@ -145,4 +145,8 @@ footer { text-align: center; color: var(--muted); margin-top: 24px; }
   color: #03120b;
 }
 
+.semaphore-image.mirror {
+  transform: scaleX(-1);
+}
+
 

@@ -47,6 +47,25 @@
       </div>
     </section>
 
+    <section class="panel">
+      <label for="mirrorSemaphoreOutput">Sémaphore Miroir</label>
+      <div id="mirrorSemaphoreOutput" class="semaphore-container"></div>
+      <div class="options-container">
+        <div class="option">
+          <input type="checkbox" id="mirrorIncludeSpaces" checked>
+          <label for="mirrorIncludeSpaces">Inclure les espaces</label>
+        </div>
+        <div class="option">
+          <label for="mirrorLettersPerLine">Lettres par ligne:</label>
+          <input type="number" id="mirrorLettersPerLine" min="1" max="20" value="10">
+        </div>
+        <div class="option">
+          <input type="checkbox" id="mirrorLineBreakWords">
+          <label for="mirrorLineBreakWords">Retour à la ligne par mot</label>
+        </div>
+      </div>
+    </section>
+
     <footer>
       <small>Made by IceCrimes – Supporte lettres, accents et chiffres en Vietnamien.</small>
     </footer>
