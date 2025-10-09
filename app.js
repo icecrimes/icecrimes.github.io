@@ -12,6 +12,9 @@
   const mirrorIncludeSpacesEl = document.getElementById('mirrorIncludeSpaces');
   const mirrorLettersPerLineEl = document.getElementById('mirrorLettersPerLine');
   const mirrorLineBreakWordsEl = document.getElementById('mirrorLineBreakWords');
+  const downloadSemaphoreBtn = document.getElementById('downloadSemaphoreBtn');
+  const downloadMirrorSemaphoreBtn = document.getElementById('downloadMirrorSemaphoreBtn');
+
 
   const accents = {
     SAC:    {flag: 1 << 0, code: '\u0301', letter: 'S'}, // sắc    00001
@@ -70,7 +73,7 @@ function getLatinToMorse(char = '') {
 
           html += `
             <div class="semaphore-item">
-              <img src="images/semaphore/${letter}.svg"
+              <img src="images/${letter}.svg"
                   alt="Sémaphore ${letter}"
                   class="semaphore-image ${mirrorClass}"
                   style="width:${imageSize}px;height:${imageSize}px;">
@@ -84,7 +87,7 @@ function getLatinToMorse(char = '') {
       if (includeSpaces && wordIndex < words.length - 1) {
         html += `
           <div class="semaphore-item">
-            <img src="images/semaphore/SPACE.svg"
+            <img src="images/SPACE.svg"
                 alt="Sémaphore ESPACE"
                 class="semaphore-image ${mirrorClass}"
                 style="width:${imageSize}px;height:${imageSize}px;">
@@ -248,6 +251,93 @@ function getLatinToMorse(char = '') {
         morseEl.select();
         document.execCommand('copy');
       }
+    });
+  }
+
+  const imageCache = {};
+
+  //   Conversion en base64
+  //   SVG chargées depuis des fichiers externes -> erreur CORS
+
+  async function imageToBase64(src) {
+    if (imageCache[src]) {
+      return imageCache[src];
+    }
+
+    return new Promise((resolve, reject) => {
+      fetch(src)
+        .then(response => response.blob())
+        .then(blob => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            imageCache[src] = reader.result;
+            resolve(reader.result);
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        })
+        .catch(reject);
+    });
+  }
+
+  async function downloadSemaphoreAsJPG(element, filename) {
+    if (!element || !element.innerHTML.trim()) {
+      alert('Aucun contenu de sémaphore à télécharger.');
+      return;
+    }
+
+    try {
+      // Cloner l'élément pour ne pas modifier l'original
+      const clone = element.cloneNode(true);
+      const images = clone.querySelectorAll('img');
+      
+      for (let img of images) {
+        const base64 = await imageToBase64(img.src);
+        img.src = base64;
+      }
+
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'absolute';
+      tempContainer.style.left = '-9999px';
+      tempContainer.style.background = '#ffffff';
+      tempContainer.appendChild(clone);
+      document.body.appendChild(tempContainer);
+
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      const canvas = await html2canvas(clone, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        logging: false,
+        allowTaint: true,
+        useCORS: false
+      });
+
+      document.body.removeChild(tempContainer);
+
+      canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(url);
+      }, 'image/jpeg', 0.95);
+    } catch (error) {
+      console.error('Erreur lors de la génération de l\'image:', error);
+      alert('Erreur lors du téléchargement de l\'image.');
+    }
+  }
+
+  if (downloadSemaphoreBtn) {
+    downloadSemaphoreBtn.addEventListener('click', () => {
+      downloadSemaphoreAsJPG(semaphoreEl, 'semaphore.jpg');
+    });
+  }
+
+  if (downloadMirrorSemaphoreBtn) {
+    downloadMirrorSemaphoreBtn.addEventListener('click', () => {
+      downloadSemaphoreAsJPG(mirrorSemaphoreEl, 'semaphore-miroir.jpg');
     });
   }
 
