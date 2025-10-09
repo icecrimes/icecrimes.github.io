@@ -1,9 +1,9 @@
 (function () {
+
     const inputEl = document.getElementById('vnInput');
     const normalizedEl = document.getElementById('normalized');
     const morseEl = document.getElementById('morseOutput');
     const copyBtn = document.getElementById('copyMorseBtn');
-
     const semaphoreEl = document.getElementById('semaphoreOutput');
     const mirrorSemaphoreEl = document.getElementById('mirrorSemaphoreOutput');
     const includeSpacesEl = document.getElementById('includeSpaces');
@@ -13,113 +13,17 @@
     const downloadMirrorSemaphoreBtn = document.getElementById('downloadMirrorSemaphoreBtn');
 
 
+    // NORMALISATION - Accents, special characters
+
     const accents = {
-        SAC: {flag: 1 << 0, code: '\u0301', letter: 'S'}, // sắc    00001
-        HUYEN: {flag: 1 << 1, code: '\u0300', letter: 'Q'}, // huyền  00010
-        HOI: {flag: 1 << 2, code: '\u0309', letter: 'Z'}, // hỏi    00100
-        NGA: {flag: 1 << 3, code: '\u0303', letter: 'X'}, // ngã    01000
-        NANG: {flag: 1 << 4, code: '\u0323', letter: 'J'}, // nặng   10000
+        SAC: {flag: 1 << 0, code: '\u0301', letter: 'S'},    // sắc
+        HUYEN: {flag: 1 << 1, code: '\u0300', letter: 'Q'},  // huyền
+        HOI: {flag: 1 << 2, code: '\u0309', letter: 'Z'},    // hỏi
+        NGA: {flag: 1 << 3, code: '\u0303', letter: 'X'},    // ngã
+        NANG: {flag: 1 << 4, code: '\u0323', letter: 'J'},   // nặng
     };
 
-    const latinToMorse = new Map(Object.entries({
-        // Letters
-        'A': '∙−', 'B': '−∙∙∙', 'C': '−∙−∙', 'D': '−∙∙', 'E': '∙',
-        'F': '∙∙−∙', 'G': '−−∙', 'H': '∙∙∙∙', 'I': '∙∙', 'J': '∙−−−',
-        'K': '−∙−', 'L': '∙−∙∙', 'M': '−−', 'N': '−∙', 'O': '−−−',
-        'P': '∙−−∙', 'Q': '−−∙−', 'R': '∙−∙', 'S': '∙∙∙', 'T': '−',
-        'U': '∙∙−', 'V': '∙∙∙−', 'W': '∙−−', 'X': '−∙∙−', 'Y': '−∙−−',
-        'Z': '−−∙∙', 'CH': '−−−−',
-        // Digits
-        '0': '−−−−−', '1': '∙−−−−', '2': '∙∙−−−', '3': '∙∙∙−−', '4': '∙∙∙∙−',
-        '5': '∙∙∙∙∙', '6': '−∙∙∙∙', '7': '−−∙∙∙', '8': '−−−∙∙', '9': '−−−−∙',
-    }));
-
-    const charSeparator = '/';
-
-    function getLatinToMorse(char = '') {
-        return (latinToMorse.get(char.toUpperCase()) ?? '?') + charSeparator;
-    }
-
-    function generateSemaphoreHTML(text, {
-        includeSpaces,
-        lettersPerLine,
-        lineBreakWords,
-        mirror = false
-    } = {}) {
-        if (!text) return '';
-
-        let html = '';
-        const baseSize = 60;
-        const maxSize = 200;
-        const sizeMultiplier = Math.max(1, (10 / (lettersPerLine || 10)));
-        const imageSize = Math.min(maxSize, Math.round(baseSize * sizeMultiplier));
-        let letterCount = 0;
-        const words = text.split(' ');
-        const mirrorClass = mirror ? 'mirror' : '';
-
-        for (let wordIndex = 0; wordIndex < words.length; wordIndex++) {
-            const word = words[wordIndex];
-
-            for (let i = 0; i < word.length; i++) {
-                const char = word[i];
-                const letter = char.toUpperCase();
-
-                if (/[A-Z0-9]/.test(letter) || letter === 'CH') {
-                    if (letterCount > 0 && letterCount % lettersPerLine === 0) {
-                        html += '<div class="semaphore-line-break"></div>';
-                    }
-
-                    html += `
-            <div class="semaphore-item">
-              <img src="images/${letter}.svg"
-                  alt="Sémaphore ${letter}"
-                  class="semaphore-image ${mirrorClass}"
-                  style="width:${imageSize}px;height:${imageSize}px;">
-              <span class="semaphore-letter">${letter}</span>
-            </div>
-          `;
-                    letterCount++;
-                }
-            }
-
-            if (includeSpaces && wordIndex < words.length - 1) {
-                html += `
-          <div class="semaphore-item">
-            <img src="images/SPACE.svg"
-                alt="Sémaphore ESPACE"
-                class="semaphore-image ${mirrorClass}"
-                style="width:${imageSize}px;height:${imageSize}px;">
-            <span class="semaphore-letter">ESP</span>
-          </div>
-        `;
-                letterCount++;
-            }
-
-            if (lineBreakWords && wordIndex < words.length - 1) {
-                html += '<div class="semaphore-line-break"></div>';
-                letterCount = 0;
-            }
-        }
-
-        return html;
-    }
-
-    function getOptionsFromElements(includeSpacesEl, lettersPerLineEl, lineBreakWordsEl, mirror) {
-        return {
-            includeSpaces: includeSpacesEl.checked,
-            lettersPerLine: parseInt(lettersPerLineEl.value),
-            lineBreakWords: lineBreakWordsEl.checked,
-            mirror
-        };
-    }
-
-    function updateSemaphore(element, includeSpacesEl, lettersPerLineEl, lineBreakWordsEl, mirror) {
-        const options = getOptionsFromElements(includeSpacesEl, lettersPerLineEl, lineBreakWordsEl, mirror);
-        element.innerHTML = generateSemaphoreHTML(normalizedEl.value, options);
-    }
-
-    function update() {
-        const raw = inputEl.value || '';
+    function normalize(raw) {
         const lower = raw.toLowerCase();
         const words = lower.split(/\s+/).filter(Boolean);
         let morseText = '';
@@ -135,8 +39,7 @@
 
         function handleDoubleD() {
             normalizedText += 'DD';
-            morseText += getLatinToMorse('D');
-            morseText += getLatinToMorse('D');
+            morseText += getLatinToMorse('D') + getLatinToMorse('D');
         }
 
         function handleCrochet() {
@@ -162,100 +65,176 @@
 
         function handleUOW() {
             normalizedText += 'UOW';
-            morseText += getLatinToMorse('U');
-            morseText += getLatinToMorse('O');
-            morseText += getLatinToMorse('W');
+            morseText += getLatinToMorse('U') + getLatinToMorse('O') + getLatinToMorse('W');
         }
 
         function handleDefault(char) {
-            normalizedText += char.toUpperCase();
-            morseText += getLatinToMorse(char.toUpperCase());
+            const upper = char.toUpperCase();
+            normalizedText += upper;
+            morseText += getLatinToMorse(upper);
         }
-
 
         for (const word of words) {
             let accent = 0;
             const NFDWord = word.normalize('NFD');
+
             for (let i = 0; i < NFDWord.length; i++) {
                 const char = NFDWord[i].toLowerCase();
                 const accentMatch = Object.values(accents).find(acc => acc.code === char);
+
                 if (accentMatch) {
                     accent |= accentMatch.flag;
                     continue;
                 }
+
                 switch (char) {
                     case 'đ':
                         handleDoubleD();
                         break;
-                    case 'u':
-                        if (i < NFDWord.length - 3 && NFDWord[i + 1] === '\u031B' && NFDWord[i + 2] === 'o' && NFDWord[i + 3] === '\u031B') {
+                    case 'u':  // 'ươ'
+                        if (i < NFDWord.length - 3 && NFDWord[i + 1] === '\u031B' &&
+                            NFDWord[i + 2] === 'o' && NFDWord[i + 3] === '\u031B') {
                             handleUOW();
-                            i = i + 3;
+                            i += 3;
                         } else {
                             handleDefault(char);
                         }
                         break;
-                    case '\u0302': // '^'
+                    case '\u0302': // 'â', 'ê', 'ô'
                         handleDoubleVowel();
                         break;
-                    case '\u031B': // 'uw' or 'ow'
+                    case '\u031B': // 'ư', 'ơ'
                         handleCrochet();
                         break;
-                    case '\u0306': // 'aw'
+                    case '\u0306': // 'ă'
                         handleHalfMoon();
                         break;
                     case 'c':
                         if (i < NFDWord.length - 1 && NFDWord[i + 1].toLowerCase() === 'h') {
                             handleCH();
                             i++;
-                            break;
-                        } // else fallthrough
+                        } else {
+                            handleDefault(char);
+                        }
+                        break;
                     default:
                         handleDefault(char);
                         break;
                 }
             }
+
             if (accent) {
-                let letter = Object.values(accents).find(acc => accent & acc.flag)?.letter;
-                normalizedText += letter;
-                morseText += getLatinToMorse(letter);
+                const letter = Object.values(accents).find(acc => accent & acc.flag)?.letter;
+                if (letter) {
+                    normalizedText += letter;
+                    morseText += getLatinToMorse(letter);
+                }
             }
+
             normalizedText += ' ';
-            morseText += charSeparator;
+            morseText += '/';
         }
-        normalizedEl.value = normalizedText.toUpperCase();
-        morseEl.value = morseText;
 
-        updateSemaphore(semaphoreEl, includeSpacesEl, lettersPerLineEl, lineBreakWordsEl, false);
-        updateSemaphore(mirrorSemaphoreEl, includeSpacesEl, lettersPerLineEl, lineBreakWordsEl, true);
+        return {
+            normalized: normalizedText.toUpperCase(),
+            morse: morseText
+        };
     }
 
-    // Event Listeners
-    [inputEl, includeSpacesEl, lettersPerLineEl, lineBreakWordsEl]
-        .forEach(el => el?.addEventListener('input', update));
-    [includeSpacesEl, lettersPerLineEl, lineBreakWordsEl]
-        .forEach(el => el?.addEventListener('change', update));
+    // Morse
 
-    if (copyBtn) {
-        copyBtn.addEventListener('click', async () => {
-            try {
-                await navigator.clipboard.writeText(morseEl.value);
-                const prev = copyBtn.textContent;
-                copyBtn.textContent = 'Copié !';
-                setTimeout(() => {
-                    copyBtn.textContent = prev || 'Copier';
-                }, 1000);
-            } catch {
-                morseEl.select();
-                document.execCommand('copy');
+    const latinToMorse = new Map(Object.entries({
+        // Letters
+        'A': '∙−', 'B': '−∙∙∙', 'C': '−∙−∙', 'D': '−∙∙', 'E': '∙',
+        'F': '∙∙−∙', 'G': '−−∙', 'H': '∙∙∙∙', 'I': '∙∙', 'J': '∙−−−',
+        'K': '−∙−', 'L': '∙−∙∙', 'M': '−−', 'N': '−∙', 'O': '−−−',
+        'P': '∙−−∙', 'Q': '−−∙−', 'R': '∙−∙', 'S': '∙∙∙', 'T': '−',
+        'U': '∙∙−', 'V': '∙∙∙−', 'W': '∙−−', 'X': '−∙∙−', 'Y': '−∙−−',
+        'Z': '−−∙∙', 'CH': '−−−−',
+        // Digits
+        '0': '−−−−−', '1': '∙−−−−', '2': '∙∙−−−', '3': '∙∙∙−−', '4': '∙∙∙∙−',
+        '5': '∙∙∙∙∙', '6': '−∙∙∙∙', '7': '−−∙∙∙', '8': '−−−∙∙', '9': '−−−−∙',
+    }));
+
+    function getLatinToMorse(char = '') {
+        return (latinToMorse.get(char.toUpperCase()) ?? '?') + '/';
+    }
+
+    // Generating SEMAPHORE with HTML and .svg files
+
+    function generateSemaphoreHTML(text, {includeSpaces, lettersPerLine, lineBreakWords, mirror = false} = {}) {
+        if (!text) return '';
+
+        let html = '';
+        const baseSize = 60;
+        const maxSize = 200;
+        const sizeMultiplier = Math.max(1, (10 / (lettersPerLine || 10)));
+        const imageSize = Math.min(maxSize, Math.round(baseSize * sizeMultiplier));
+        let letterCount = 0;
+        const words = text.split(' ');
+        const mirrorClass = mirror ? 'mirror' : '';
+
+        for (let wordIndex = 0; wordIndex < words.length; wordIndex++) {
+            const word = words[wordIndex];
+
+            for (let i = 0; i < word.length; i++) {
+                const char = word[i];
+                const letter = char.toUpperCase();
+
+                if (/[A-Z0-9]/.test(letter) || letter === 'CH') {
+                    if (letterCount > 0 && letterCount % lettersPerLine === 0) {
+                        html += '<div class="semaphore-line-break"></div>';
+                    }
+
+                    html += `
+                        <div class="semaphore-item">
+                            <img src="images/${letter}.svg"
+                                alt="Sémaphore ${letter}"
+                                class="semaphore-image ${mirrorClass}"
+                                style="width:${imageSize}px;height:${imageSize}px;">
+                            <span class="semaphore-letter">${letter}</span>
+                        </div>
+                    `;
+                    letterCount++;
+                }
             }
-        });
+
+            if (includeSpaces && wordIndex < words.length - 1) {
+                html += `
+                    <div class="semaphore-item">
+                        <img src="images/SPACE.svg"
+                            alt="Sémaphore ESPACE"
+                            class="semaphore-image ${mirrorClass}"
+                            style="width:${imageSize}px;height:${imageSize}px;">
+                        <span class="semaphore-letter">ESP</span>
+                    </div>
+                `;
+                letterCount++;
+            }
+
+            if (lineBreakWords && wordIndex < words.length - 1) {
+                html += '<div class="semaphore-line-break"></div>';
+                letterCount = 0;
+            }
+        }
+
+        return html;
     }
+
+    function updateSemaphore(element, mirror) {
+        const options = {
+            includeSpaces: includeSpacesEl.checked,
+            lettersPerLine: parseInt(lettersPerLineEl.value),
+            lineBreakWords: lineBreakWordsEl.checked,
+            mirror
+        };
+        element.innerHTML = generateSemaphoreHTML(normalizedEl.value, options);
+    }
+
+
+    // JPG Download
 
     const imageCache = {};
-
-    //   Conversion en base64
-    //   SVG chargées depuis des fichiers externes -> erreur CORS
 
     async function imageToBase64(src) {
         if (imageCache[src]) {
@@ -278,7 +257,6 @@
         });
     }
 
-
     async function downloadSemaphoreAsJPG(element, filename) {
         if (!element || !element.innerHTML.trim()) {
             alert('Aucun contenu de sémaphore à télécharger.');
@@ -286,7 +264,6 @@
         }
 
         try {
-            // Cloner l'élément pour ne pas modifier l'original
             const clone = element.cloneNode(true);
             const images = clone.querySelectorAll('img');
 
@@ -295,18 +272,12 @@
                 img.src = base64;
             }
 
-            // Récupérer la valeur de lettres par ligne
             const lettersPerLine = parseInt(lettersPerLineEl.value) || 10;
             const lineBreakWords = lineBreakWordsEl.checked;
-
-            // Réorganiser le contenu en lignes pour éviter les problèmes de flex-wrap
             const items = Array.from(clone.querySelectorAll('.semaphore-item'));
-            const lineBreaks = Array.from(clone.querySelectorAll('.semaphore-line-break'));
 
-            // Vider le clone
             clone.innerHTML = '';
 
-            // Reconstruire avec des lignes explicites
             let currentLine = document.createElement('div');
             currentLine.style.cssText = 'display: flex; gap: 10px; justify-content: center; margin-bottom: 10px;';
 
@@ -318,17 +289,14 @@
                 itemsInCurrentLine++;
                 itemIndex++;
 
-                // Vérifier si on doit faire un retour à la ligne
                 let shouldBreak = false;
 
                 if (lineBreakWords) {
-                    // Chercher si l'item original était suivi d'un line-break
                     const originalItem = element.querySelectorAll('.semaphore-item')[itemIndex - 1];
                     if (originalItem && originalItem.nextElementSibling?.classList.contains('semaphore-line-break')) {
                         shouldBreak = true;
                     }
                 } else {
-                    // Retour à la ligne tous les N items
                     if (itemsInCurrentLine >= lettersPerLine && itemIndex < items.length) {
                         shouldBreak = true;
                     }
@@ -342,27 +310,26 @@
                 }
             }
 
-            // Ajouter la dernière ligne
             if (currentLine.children.length > 0) {
                 clone.appendChild(currentLine);
             }
 
             const tempContainer = document.createElement('div');
             tempContainer.style.cssText = `
-        position: absolute;
-        left: -9999px;
-        top: 0;
-        padding: 20px;
-        display: inline-block;
-      `;
+                position: absolute;
+                left: -9999px;
+                top: 0;
+                padding: 20px;
+                display: inline-block;
+            `;
 
             clone.style.cssText = `
-        display: block;
-        padding: 10px;
-        background: white;
-        border-radius: 10px;
-        width: fit-content;
-      `;
+                display: block;
+                padding: 10px;
+                background: white;
+                border-radius: 10px;
+                width: fit-content;
+            `;
 
             tempContainer.appendChild(clone);
             document.body.appendChild(tempContainer);
@@ -392,6 +359,43 @@
             alert('Erreur lors du téléchargement de l\'image.');
         }
     }
+
+
+    function update() {
+        const raw = inputEl.value || '';
+        const {normalized, morse} = normalize(raw);
+
+        normalizedEl.value = normalized;
+        morseEl.value = morse;
+
+        updateSemaphore(semaphoreEl, false);
+        updateSemaphore(mirrorSemaphoreEl, true);
+    }
+
+
+    // Event Listeners
+
+    [inputEl, includeSpacesEl, lettersPerLineEl, lineBreakWordsEl]
+        .forEach(el => el?.addEventListener('input', update));
+    [includeSpacesEl, lettersPerLineEl, lineBreakWordsEl]
+        .forEach(el => el?.addEventListener('change', update));
+
+    if (copyBtn) {
+        copyBtn.addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(morseEl.value);
+                const prev = copyBtn.textContent;
+                copyBtn.textContent = 'Copié !';
+                setTimeout(() => {
+                    copyBtn.textContent = prev || 'Copier';
+                }, 1000);
+            } catch {
+                morseEl.select();
+                document.execCommand('copy');
+            }
+        });
+    }
+
     if (downloadSemaphoreBtn) {
         downloadSemaphoreBtn.addEventListener('click', () => {
             downloadSemaphoreAsJPG(semaphoreEl, 'semaphore.jpg');
@@ -404,5 +408,6 @@
         });
     }
 
+    // Initialisation
     update();
 })();
