@@ -1,77 +1,72 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Traduction Morse VN → Morse</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Vietnamien → Morse & Sémaphore</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main class="container">
-    <h1>Vietnamien → Morse</h1>
+<main class="container">
+    <h1>Vietnamien → Morse & Sémaphore</h1>
     <section class="panel">
-      <label for="vnInput">Texte vietnamien</label>
-      <textarea id="vnInput" placeholder="Tapez du texte vietnamien ici..."></textarea>
+        <label for="vnInput">Texte vietnamien</label>
+        <textarea id="vnInput" placeholder="Tapez du texte vietnamien ici..."></textarea>
     </section>
 
     <section class="panel">
-      <label for="normalized">Texte Normalisé</label>
-      <textarea id="normalized" readonly></textarea>
-      <div class="hint">La normalisation romanise les caractères vietnamiens ( đ → dd, ă → aw ... ) et ajoute les accents à la fin du mot.</div>
+        <label for="normalized">Texte Normalisé</label>
+        <textarea id="normalized" readonly></textarea>
+        <div class="hint">La normalisation romanise les caractères vietnamiens ( đ → dd, ă → aw ... ) et ajoute les
+            accents à la fin du mot.
+        </div>
     </section>
 
     <section class="panel">
-      <label for="morseOutput">Morse</label>
-      <textarea id="morseOutput" readonly></textarea>
-      <div class="row">
-        <button id="copyMorseBtn" type="button">Copier le Morse</button>
-      </div>
+        <label for="morseOutput">Morse</label>
+        <textarea id="morseOutput" readonly></textarea>
+        <div class="row">
+            <button id="copyMorseBtn" type="button">Copier</button>
+        </div>
     </section>
 
     <section class="panel">
-      <label for="semaphoreOutput">Sémaphore</label>
-      <div id="semaphoreOutput" class="semaphore-container"></div>
-      <div class="options-container">
-        <div class="option">
-          <input type="checkbox" id="includeSpaces" checked>
-          <label for="includeSpaces">Inclure les espaces</label>
+        <label for="semaphoreOutput">Sémaphore</label>
+        <div id="semaphoreOutput" class="semaphore-container"></div>
+        <div class="row">
+            <button id="downloadSemaphoreBtn" type="button">Télécharger en JPG</button>
         </div>
-        <div class="option">
-          <label for="lettersPerLine">Lettres par ligne:</label>
-          <input type="number" id="lettersPerLine" min="1" max="20" value="10">
+        <div class="options-container">
+            <div class="option">
+                <input type="checkbox" id="includeSpaces" checked>
+                <label for="includeSpaces">Inclure les espaces</label>
+            </div>
+            <div class="option">
+                <label for="lettersPerLine">Lettres par ligne:</label>
+                <input type="number" id="lettersPerLine" min="1" max="10" value="10">
+            </div>
+            <div class="option">
+                <input type="checkbox" id="lineBreakWords">
+                <label for="lineBreakWords">Retour à la ligne par mot</label>
+            </div>
         </div>
-        <div class="option">
-          <input type="checkbox" id="lineBreakWords">
-          <label for="lineBreakWords">Retour à la ligne par mot</label>
-        </div>
-      </div>
     </section>
 
     <section class="panel">
-      <label for="mirrorSemaphoreOutput">Sémaphore Miroir</label>
-      <div id="mirrorSemaphoreOutput" class="semaphore-container"></div>
-      <div class="options-container">
-        <div class="option">
-          <input type="checkbox" id="mirrorIncludeSpaces" checked>
-          <label for="mirrorIncludeSpaces">Inclure les espaces</label>
+        <label for="mirrorSemaphoreOutput">Sémaphore Miroir</label>
+        <div id="mirrorSemaphoreOutput" class="semaphore-container"></div>
+        <div class="row">
+            <button id="downloadMirrorSemaphoreBtn" type="button">Télécharger en JPG</button>
         </div>
-        <div class="option">
-          <label for="mirrorLettersPerLine">Lettres par ligne:</label>
-          <input type="number" id="mirrorLettersPerLine" min="1" max="20" value="10">
-        </div>
-        <div class="option">
-          <input type="checkbox" id="mirrorLineBreakWords">
-          <label for="mirrorLineBreakWords">Retour à la ligne par mot</label>
-        </div>
-      </div>
     </section>
 
     <footer>
-      <small>Made by IceCrimes – Supporte lettres, accents et chiffres en Vietnamien.</small>
+        <small>© 2025 TNTT Đoàn Kitô Vua Paris – Ban Kỹ Thuật</small>
     </footer>
-  </main>
+</main>
 
-  <script src="app.js"></script>
-  
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="app.js"></script>
+
 </body>
 </html>

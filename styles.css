@@ -126,12 +126,24 @@ footer { text-align: center; color: var(--muted); margin-top: 24px; }
   gap: 5px;
 }
 
+.option input[type="checkbox"] {
+    margin: 0;
+    cursor: pointer;
+}
+
+.option label {
+    margin: 0;
+    cursor: pointer;
+    font-weight: 400;
+}
+
+
 #lettersPerLine {
   width: 50px;
   padding: 3px;
   border-radius: 3px;
   border: 1px solid var(--border);
-  background: var(--input);
+  background: #0f172a;
   color: var(--text);
 }
 
