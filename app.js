@@ -331,6 +331,26 @@
                 width: fit-content;
             `;
 
+            let isMirror = false;
+            if (element === mirrorSemaphoreEl || filename.includes('miroir')) {
+                isMirror = true;
+            }
+            // === AJOUT du texte (miroir) AVANT le clone si besoin ===
+            if (isMirror) {
+                const miroirDiv = document.createElement('div');
+                miroirDiv.textContent = '(miroir)';
+                miroirDiv.style.cssText = `
+                    text-align: center;
+                    font-size: 22px;
+                    font-weight: bold;
+                    color: #444;
+                    margin: 8px 0 14px 0;
+                    font-family: Arial, sans-serif;
+                `;
+                tempContainer.appendChild(miroirDiv);
+            }
+
+
             tempContainer.appendChild(clone);
             document.body.appendChild(tempContainer);
 
