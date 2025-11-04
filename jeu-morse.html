@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Jeu : Devine le mot en morse</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="main-header">
+    <nav>
+        <a href="index.html" class="nav-link nav-home">Traducteurs</a>
+        <div class="nav-dropdown">
+            <span class="nav-link nav-games">Jeux ▼</span>
+            <div class="nav-dropdown-content">
+                <a href="jeu-morse.html">Jeu Morse</a>
+                <a href="jeu-semaphore.html">Jeu Sémaphore</a>
+            </div>
+        </div>
+    </nav>
+</header>
+<main class="container">
+    <h1>Jeu : Devine le mot en morse</h1>
+    <section class="panel" id="jeu-morse-setup">
+        <h2>Règles du jeu</h2>
+        <ul>
+            <li>Un mot en morse s'affiche, à toi de deviner sa version écrite !</li>
+            <li>Chaque bonne réponse te fait passer au mot suivant.</li>
+            <li>Un chronomètre s'affiche, à la fin tu verras ton temps et tes résultats.</li>
+        </ul>
+        <div class="morse-game-settings">
+            <label>Nombre de mots à deviner :</label>
+            <div class="row morse-game-modes">
+                <label><input name="nbMots" type="radio" value="1" checked> 1</label>
+                <label><input name="nbMots" type="radio" value="5"> 5</label>
+                <label><input name="nbMots" type="radio" value="10"> 10</label>
+                <label>
+                    <input name="nbMots" type="radio" value="custom">
+                    <input id="nbMotsCustom" type="number" min="1" style="width:50px;" placeholder="Libre" disabled>
+                </label>
+            </div>
+            <button id="morseStartBtn" type="button">Jouer</button>
+        </div>
+    </section>
+
+    <section class="panel" id="jeu-morse-game" style="display:none">
+        <div class="morse-game-header">
+            <span id="morseGameProgress"></span>
+            <span id="morseGameTimer"></span>
+        </div>
+        <div class="morse-game-row">
+            <div id="morseGameMorse" class="morse-game-morse"></div>
+            <input type="text" id="morseGameGuess" placeholder="Tape ta réponse ici..." autocomplete="off">
+            <button id="morseGameBtn" type="button">Valider</button>
+        </div>
+        <div id="morseGameResult" class="morse-game-result"></div>
+    </section>
+
+    <section class="panel" id="jeu-morse-score" style="display:none">
+        <h2>Partie terminée !</h2>
+        <div id="morseScoreRecap"></div>
+        <button type="button" onclick="window.location.reload()">Rejouer</button>
+    </section>
+
+    <footer>
+        <small>© 2025 Ban Kỹ Thuật – TNTT Đoàn Kitô Vua Paris </small>
+    </footer>
+</main>
+<script src="app.js"></script>
+</body>
+</html>

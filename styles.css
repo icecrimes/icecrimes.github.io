@@ -181,3 +181,217 @@ footer { text-align: center; color: var(--muted); margin-top: 24px; }
     padding-top: 2px;
     padding-bottom: 2px;
 }
+
+#morse-game {
+    margin-top: 16px;
+}
+
+.morse-game-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+    margin: 12px 0;
+}
+
+.morse-game-morse {
+    font-family: 'Fira Mono', 'Consolas', monospace;
+    font-size: 22px;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+    color: var(--primary);
+    user-select: all;
+    background: #162032;
+    border-radius: 6px;
+    padding: 9px 12px;
+    min-height: 36px;
+}
+
+#morseGameGuess {
+    padding: 8px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+    font-size: 17px;
+    margin: 6px 0 0 0;
+}
+
+#morseGameBtn, .morse-game-new {
+    margin-top: 4px;
+    background: linear-gradient(180deg, #2563eb, #065fd4);
+    color: #e5e7eb;
+    border: 1px solid #0545a7;
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-size: 16px;
+}
+
+.morse-game-result {
+    margin-top: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    min-height: 20px;
+}
+
+.morse-game-result.success { color: #22c55e; }
+.morse-game-result.error { color: #ee5555; }
+
+.morse-game-new {
+    background: linear-gradient(180deg, #22c55e, #16a34a);
+    color: #03120b;
+    font-weight: 700;
+    border: 1px solid var(--primary-900);
+    margin-top: 13px;
+}
+
+.main-header {
+    background: #151d33;
+    padding: 0;
+    margin-bottom: 20px;
+    border-bottom: 1.5px solid #222b45;
+}
+.main-header nav {
+    display: flex;
+    gap: 25px;
+    align-items: center;
+    font-size: 18px;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 10px 16px 8px 16px;
+}
+.nav-link {
+    color: #38bdf8;
+    text-decoration: none;
+    font-weight: 700;
+    padding: 7px 14px;
+    border-radius: 7px;
+    transition: background 0.15s;
+    cursor: pointer;
+}
+.nav-link:hover, .nav-dropdown:hover .nav-link.nav-games {
+    background: #0ea5e922;
+}
+.nav-dropdown {
+    position: relative;
+    display: inline-block;
+}
+.nav-dropdown-content {
+    display: none;
+    position: absolute;
+    background: #192040ee;
+    min-width: 160px;
+    z-index: 99;
+    border-radius: 7px;
+    margin-top: 2px;
+    box-shadow: 0 2px 20px 0 #0004;
+    overflow: hidden;
+    border: 1.5px solid #16407545;
+}
+.nav-dropdown-content a {
+    color: #7dd3fc;
+    padding: 11px 16px;
+    text-decoration: none;
+    display: block;
+    font-weight: 600;
+    font-size: 16px;
+    transition: background 0.12s;
+}
+.nav-dropdown-content a:hover {
+    background: #083344cc;
+    color: #fff;
+}
+.nav-dropdown:hover .nav-dropdown-content {
+    display: block;
+}
+.nav-home {
+    margin-right: 7px;
+}
+.nav-games {
+    cursor: pointer;
+    user-select: none;
+}
+
+@media (max-width: 600px) {
+    .main-header nav { flex-direction: column; gap: 5px; align-items: stretch; font-size: 16px; }
+}
+
+.morse-game-settings {
+    margin: 15px 0 10px 0;
+    font-size: 16px;
+}
+.morse-game-modes label {
+    margin-right: 10px;
+    font-weight: 500;
+    gap: 3px;
+}
+.morse-game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #133;
+    border-radius: 9px;
+    padding: 7px 15px;
+    margin-bottom: 12px;
+    font-size: 18px;
+}
+#morseGameTimer {
+    color: #00e083;
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.morse-recap-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+    margin-bottom: 12px;
+    background: #0b1623;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px 0 #0002;
+    font-size: 17px;
+}
+
+.morse-recap-table th, .morse-recap-table td {
+    border: none;
+    padding: 10px 12px;
+    text-align: center;
+}
+
+.morse-recap-table th {
+    background: #23314a;
+    color: #38bdf8;
+    font-weight: 700;
+    font-size: 18px;
+}
+
+.morse-recap-table tr:nth-child(even) {
+    background: #172136;
+}
+
+.morse-recap-table tr:nth-child(odd) {
+    background: #122439;
+}
+
+.morse-recap-table td.time {
+    color: #36ddad;
+    font-family: monospace;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+@media (max-width: 600px) {
+    .morse-recap-table, .morse-recap-table tbody, .morse-recap-table tr {
+        display: block;
+        width: 100%;
+    }
+    .morse-recap-table th, .morse-recap-table td {
+        padding: 8px 6px;
+        font-size: 15px;
+        display: block;
+        width: 100%;
+    }
+    .morse-recap-table tr { margin-bottom: 6px; }
+}
