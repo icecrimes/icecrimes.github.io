@@ -428,6 +428,221 @@
         });
     }
 
+// === JEU MORSE ===
+
+    const morseGameWords = [
+        "chat", "maison", "soleil", "arbre", "livre", "jour", "nuit", "pomme", "eau", "table",
+        "porte", "lampe", "main", "amour", "bouteille", "fromage", "pain", "feu", "route", "coeur"
+    ];
+
+    let morseGameState = null;
+
+    function shuffleArray(array) {
+        // Durstenfeld shuffle
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    function morseGameWordToMorse(word) {
+        return word
+            .toUpperCase()
+            .split("")
+            .map(char => getLatinToMorse(char).replace(/\//, ''))
+            .join(' / ') + ' /';
+    }
+
+    function morseShowSetup() {
+        document.getElementById('jeu-morse-setup').style.display = '';
+        document.getElementById('jeu-morse-game').style.display = 'none';
+        document.getElementById('jeu-morse-score').style.display = 'none';
+    }
+
+    function morseShowGame() {
+        document.getElementById('jeu-morse-setup').style.display = 'none';
+        document.getElementById('jeu-morse-game').style.display = '';
+        document.getElementById('jeu-morse-score').style.display = 'none';
+    }
+
+    function morseShowScore() {
+        document.getElementById('jeu-morse-setup').style.display = 'none';
+        document.getElementById('jeu-morse-game').style.display = 'none';
+        document.getElementById('jeu-morse-score').style.display = '';
+    }
+
+    function startMorseGame(nbMots) {
+        // Sélectionne aléatoirement nbMots mots (ou tous si pas assez)
+        let pool = [...morseGameWords];
+        shuffleArray(pool);
+        let motsChoisis = pool.slice(0, Math.min(nbMots, pool.length));
+        morseGameState = {
+            mots: motsChoisis,
+            current: 0,
+            found: 0,
+            startTime: null,
+            endTime: null,
+            motStart: null,  // début pour le mot courant
+            perWordTimes: [],
+            perWordGuesses: [],
+        };
+        morseShowGame();
+        morseGameState.startTime = Date.now();
+        morseGameState.motStart = Date.now();
+        morseRenderMot();
+        morseUpdateProgress();
+        morseStartTimer();
+    }
+
+    function morseRenderMot() {
+        let mot = morseGameState.mots[morseGameState.current];
+        document.getElementById('morseGameMorse').textContent = morseGameWordToMorse(mot);
+        document.getElementById('morseGameGuess').value = '';
+        document.getElementById('morseGameResult').textContent = '';
+        document.getElementById('morseGameResult').className = 'morse-game-result';
+        document.getElementById('morseGameGuess').focus();
+
+        // Reset timer display for this word
+        morseUpdatePerWordTimer();
+    }
+
+    function morseUpdateProgress() {
+        let progress = `${morseGameState.current + 1} / ${morseGameState.mots.length}`;
+        document.getElementById('morseGameProgress').textContent = `Mot : ${progress}`;
+    }
+
+    let morseTimerInterval = null;
+
+    function morseUpdatePerWordTimer() {
+        const timerEl = document.getElementById('morseGameTimer');
+        if (!morseGameState || morseGameState.endTime) return;
+        let now = Date.now();
+        let t = (now - morseGameState.motStart) / 1000;
+        timerEl.textContent = `⏱ ${ t.toFixed(2) } s / mot`;
+    }
+
+    function morseStartTimer() {
+        if (morseTimerInterval) clearInterval(morseTimerInterval);
+        function update() {
+            morseUpdatePerWordTimer();
+        }
+        update();
+        morseTimerInterval = setInterval(update, 60);
+    }
+
+    function morseGameFin() {
+        morseGameState.endTime = Date.now();
+        if (morseTimerInterval) clearInterval(morseTimerInterval);
+        morseShowScore();
+        const total = ((morseGameState.endTime - morseGameState.startTime)/1000);
+
+        let html = `<div style="font-size:18px;">
+        <b>Score : <span style="color:#19d853">${morseGameState.found} / ${morseGameState.mots.length}</span></b><br>
+        Temps total : <b style="color:#36ddad">${total.toFixed(2)} s</b>
+        <br>
+        <table class="morse-recap-table">
+        <tr>
+            <th>#</th>
+            <th>Mot à deviner</th>
+            <th>Temps (s)</th>
+        </tr>
+        ${
+            morseGameState.mots.map((mot, i) => `
+                <tr>
+                    <td>${i+1}</td>
+                    <td>${mot}</td>
+                    <td class="time">${ (morseGameState.perWordTimes[i]||0).toFixed(2) }</td>
+                </tr>
+            `).join("")
+        }
+        </table>
+        </div>
+    `;
+        document.getElementById('morseScoreRecap').innerHTML = html;
+    }
+
+    function morseGameCheck() {
+        if (!morseGameState) return;
+        const guess = document.getElementById('morseGameGuess').value.trim().toLowerCase();
+        const resultDiv = document.getElementById('morseGameResult');
+        const currentWord = morseGameState.mots[morseGameState.current];
+
+        if (!guess) {
+            resultDiv.textContent = "Écris ta proposition !";
+            resultDiv.className = "morse-game-result error";
+            return;
+        }
+
+        morseGameState.perWordGuesses[morseGameState.current] = guess;
+        const now = Date.now();
+        morseGameState.perWordTimes[morseGameState.current] = ((now - morseGameState.motStart) / 1000);
+
+        if (guess === currentWord) {
+            resultDiv.textContent = "Bravo ! Bonne réponse 🎉";
+            resultDiv.className = "morse-game-result success";
+            morseGameState.found++;
+
+            // Prochain mot après 0,6s
+            setTimeout(() => {
+                morseGameNext();
+            }, 650);
+
+        } else {
+            resultDiv.textContent = `Raté ! Réessaie.`;
+            resultDiv.className = "morse-game-result error";
+        }
+    }
+
+    function morseGameNext() {
+        morseGameState.current++;
+        if (morseGameState.current < morseGameState.mots.length) {
+            morseGameState.motStart = Date.now();
+            morseRenderMot();
+            morseUpdateProgress();
+        } else {
+            morseGameFin();
+        }
+    }
+
+// Gestion du setup page (choix du nombre de mots)
+    window.addEventListener("DOMContentLoaded", () => {
+        if (document.getElementById("jeu-morse-setup")) {
+            // Custom radio + input activation
+            const radios = document.querySelectorAll('input[name="nbMots"]');
+            const customInput = document.getElementById('nbMotsCustom');
+            radios.forEach(radio => {
+                radio.onchange = () => {
+                    if (radio.value === "custom") {
+                        customInput.disabled = false;
+                        customInput.focus();
+                    } else { customInput.disabled = true; }
+                };
+            });
+
+            document.getElementById('morseStartBtn').onclick = () => {
+                let nb = 1;
+                const selected = Array.from(radios).find(r => r.checked);
+                if (selected.value === "custom") {
+                    nb = Math.max(1, parseInt(customInput.value) || 1);
+                } else {
+                    nb = parseInt(selected.value);
+                }
+                startMorseGame(nb);
+            }
+            morseShowSetup();
+
+            // Game
+            document.getElementById('morseGameBtn').onclick = morseGameCheck;
+            document.getElementById('morseGameGuess').onkeyup = (e) => {
+                if (e.key === "Enter") morseGameCheck();
+            };
+            // Pour éviter ancienne interface : supprimer le bouton "Nouveau mot" s'il est là
+            const old = document.getElementById('morseGameNew');
+            if (old) old.style.display = 'none';
+        }
+    });
+
+
     // Initialisation
     update();
 })();
