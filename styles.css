@@ -395,3 +395,116 @@ footer { text-align: center; color: var(--muted); margin-top: 24px; }
     }
     .morse-recap-table tr { margin-bottom: 6px; }
 }
+
+/* Styles for Semaphore Game */
+#semaphoreGameImages {
+    background: white;
+    border-radius: 10px;
+    padding: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    min-height: 80px;
+}
+
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #133;
+    border-radius: 9px;
+    padding: 7px 15px;
+    margin-bottom: 12px;
+    font-size: 18px;
+}
+
+#semaphoreGameTimer {
+    color: #00e083;
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.game-controls {
+    display: flex;
+    gap: 10px;
+}
+
+#semaphoreGameGuess {
+    flex-grow: 1;
+    padding: 8px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+    font-size: 17px;
+}
+
+#semaphoreGameBtn {
+    background: linear-gradient(180deg, #2563eb, #065fd4);
+    color: #e5e7eb;
+    border: 1px solid #0545a7;
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-size: 16px;
+}
+
+.semaphore-game-result {
+    margin-top: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    min-height: 20px;
+}
+
+.semaphore-game-result.success { color: #22c55e; }
+.semaphore-game-result.error { color: #ee5555; }
+
+.semaphore-recap-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+    margin-bottom: 12px;
+    background: #0b1623;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px 0 #0002;
+    font-size: 17px;
+}
+
+.semaphore-recap-table th, .semaphore-recap-table td {
+    border: none;
+    padding: 10px 12px;
+    text-align: center;
+}
+
+.semaphore-recap-table th {
+    background: #23314a;
+    color: #38bdf8;
+    font-weight: 700;
+    font-size: 18px;
+}
+
+.semaphore-recap-table tr:nth-child(even) {
+    background: #172136;
+}
+
+.semaphore-recap-table tr:nth-child(odd) {
+    background: #122439;
+}
+
+.semaphore-recap-table td.time {
+    color: #36ddad;
+    font-family: monospace;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.radio-group {
+    margin: 15px 0;
+}
+
+.radio-group label {
+    margin-right: 15px;
+}
