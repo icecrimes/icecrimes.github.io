@@ -397,12 +397,16 @@ footer { text-align: center; color: var(--muted); margin-top: 24px; }
 }
 
 /* Styles for Semaphore Game */
-.semaphore-game-images {
+#semaphoreGameImages {
+    background: white;
+    border-radius: 10px;
+    padding: 10px;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 10px;
     margin-bottom: 15px;
+    min-height: 80px;
 }
 
 .game-header {
