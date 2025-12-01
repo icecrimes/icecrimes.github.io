@@ -21,9 +21,50 @@
 </header>
 <main class="container">
     <h1>Jeu : Devine le mot en sémaphore</h1>
-    <section class="panel">
-        <p>Le jeu arrive bientôt !</p>
-    </section>
+
+    <div id="jeu-semaphore-setup" class="panel">
+        <h2>Règles du jeu</h2>
+        <ul>
+            <li>Un mot en Semaphore s'affiche, à toi de trouver lequel !</li>
+            <li>Chaque bonne réponse fait passer au mot suivant.</li>
+            <li>Un chronomètre s'affiche, tu verras les résultats après avoir fini la série !</li>
+        </ul>
+
+        <div class="semaphore-game-settings">
+            <label>Nombre de mots à deviner :</label>
+            <div class="row morse-game-modes">
+                <label><input name="nbMotsSemaphore" type="radio" value="1" checked> 1</label>
+                <label><input name="nbMotsSemaphore" type="radio" value="5"> 5</label>
+                <label><input name="nbMotsSemaphore" type="radio" value="10"> 10</label>
+                <label>
+                    <input name="nbMotsSemaphore" type="radio" value="custom">
+                    <input id="nbMotsCustomSemaphore" type="number" min="1" style="width:50px;" placeholder="Libre" disabled>
+                </label>
+            </div>
+            <button id="semaphoreStartBtn" type="button">Jouer</button>
+        </div>
+    </div>
+    <div id="jeu-semaphore-game" class="panel" style="display: none;">
+
+        <div class="game-header">
+            <span id="semaphoreGameProgress"></span>
+            <span id="semaphoreGameTimer"></span>
+        </div>
+        <div id="semaphoreGameImages" class="semaphore-game-images"></div>
+        <div class="game-controls">
+            <input type="text" id="semaphoreGameGuess" placeholder="Ta réponse...">
+            <button id="semaphoreGameBtn" class="button">Valider</button>
+        </div>
+        <div id="semaphoreGameResult" class="semaphore-game-result"></div>
+
+    </div>
+
+    <div id="jeu-semaphore-score" class="panel" style="display: none;">
+        <h2>Partie terminée !</h2>
+        <div id="semaphoreScoreRecap"></div>
+        <button onclick="semaphoreShowSetup()" class="button">Rejouer</button>
+    </div>
+
     <footer>
         <small>© 2025 Ban Kỹ Thuật – TNTT Đoàn Kitô Vua Paris </small>
     </footer>

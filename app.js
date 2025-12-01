@@ -162,7 +162,7 @@
 
     // Generating SEMAPHORE with HTML and .svg files
 
-    function generateSemaphoreHTML(text, {includeSpaces, lettersPerLine, lineBreakWords, mirror = false} = {}) {
+    function generateSemaphoreHTML(text, {includeSpaces, lettersPerLine, lineBreakWords, mirror = false, showLetters = true} = {}) {
         if (!text) return '';
 
         let html = '';
@@ -192,7 +192,7 @@
                                 alt="Sémaphore ${letter}"
                                 class="semaphore-image ${mirrorClass}"
                                 style="width:${imageSize}px;height:${imageSize}px;">
-                            <span class="semaphore-letter">${letter}</span>
+                            ${showLetters ? `<span class="semaphore-letter">${letter}</span>` : ''}
                         </div>
                     `;
                     letterCount++;
@@ -206,7 +206,7 @@
                             alt="Sémaphore ESPACE"
                             class="semaphore-image ${mirrorClass}"
                             style="width:${imageSize}px;height:${imageSize}px;">
-                        <span class="semaphore-letter">ESP</span>
+                        ${showLetters ? '<span class="semaphore-letter">ESP</span>' : ''}
                     </div>
                 `;
                 letterCount++;
@@ -226,7 +226,8 @@
             includeSpaces: includeSpacesEl.checked,
             lettersPerLine: parseInt(lettersPerLineEl.value),
             lineBreakWords: lineBreakWordsEl.checked,
-            mirror
+            mirror,
+            showLetters: true
         };
         element.innerHTML = generateSemaphoreHTML(normalizedEl.value, options);
     }
@@ -518,7 +519,7 @@
         if (!morseGameState || morseGameState.endTime) return;
         let now = Date.now();
         let t = (now - morseGameState.motStart) / 1000;
-        timerEl.textContent = `⏱ ${ t.toFixed(2) } s / mot`;
+        timerEl.textContent = `⏱ ${ t.toFixed(2) } s`;
     }
 
     function morseStartTimer() {
@@ -535,10 +536,12 @@
         if (morseTimerInterval) clearInterval(morseTimerInterval);
         morseShowScore();
         const total = ((morseGameState.endTime - morseGameState.startTime)/1000);
+        const average = total / morseGameState.mots.length;
 
         let html = `<div style="font-size:18px;">
         <b>Score : <span style="color:#19d853">${morseGameState.found} / ${morseGameState.mots.length}</span></b><br>
-        Temps total : <b style="color:#36ddad">${total.toFixed(2)} s</b>
+        Temps total : <b style="color:#36ddad">${total.toFixed(2)} s</b><br>
+        Moyenne : <b style="color:#36ddad">${average.toFixed(2)} s / mot</b>
         <br>
         <table class="morse-recap-table">
         <tr>
@@ -604,6 +607,165 @@
         }
     }
 
+// === JEU SEMAPHORE ===
+
+    const semaphoreGameWords = [
+        "chat", "maison", "soleil", "arbre", "livre", "jour", "nuit", "pomme", "eau", "table",
+        "porte", "lampe", "main", "amour", "bouteille", "fromage", "pain", "feu", "route", "coeur"
+    ];
+
+    let semaphoreGameState = null;
+
+    function semaphoreShowSetup() {
+        document.getElementById('jeu-semaphore-setup').style.display = '';
+        document.getElementById('jeu-semaphore-game').style.display = 'none';
+        document.getElementById('jeu-semaphore-score').style.display = 'none';
+    }
+
+    function semaphoreShowGame() {
+        document.getElementById('jeu-semaphore-setup').style.display = 'none';
+        document.getElementById('jeu-semaphore-game').style.display = '';
+        document.getElementById('jeu-semaphore-score').style.display = 'none';
+    }
+
+    function semaphoreShowScore() {
+        document.getElementById('jeu-semaphore-setup').style.display = 'none';
+        document.getElementById('jeu-semaphore-game').style.display = 'none';
+        document.getElementById('jeu-semaphore-score').style.display = '';
+    }
+
+    function startSemaphoreGame(nbMots) {
+        let pool = [...semaphoreGameWords];
+        shuffleArray(pool);
+        let motsChoisis = pool.slice(0, Math.min(nbMots, pool.length));
+        semaphoreGameState = {
+            mots: motsChoisis,
+            current: 0,
+            found: 0,
+            startTime: null,
+            endTime: null,
+            motStart: null,
+            perWordTimes: [],
+            perWordGuesses: [],
+        };
+        semaphoreShowGame();
+        semaphoreGameState.startTime = Date.now();
+        semaphoreGameState.motStart = Date.now();
+        semaphoreRenderMot();
+        semaphoreUpdateProgress();
+        semaphoreStartTimer();
+    }
+
+    function semaphoreRenderMot() {
+        let mot = semaphoreGameState.mots[semaphoreGameState.current];
+        document.getElementById('semaphoreGameImages').innerHTML = generateSemaphoreHTML(mot, {lettersPerLine: mot.length, showLetters: false});
+        document.getElementById('semaphoreGameGuess').value = '';
+        document.getElementById('semaphoreGameResult').textContent = '';
+        document.getElementById('semaphoreGameResult').className = 'semaphore-game-result';
+        document.getElementById('semaphoreGameGuess').focus();
+        semaphoreUpdatePerWordTimer();
+    }
+
+    function semaphoreUpdateProgress() {
+        let progress = `${semaphoreGameState.current + 1} / ${semaphoreGameState.mots.length}`;
+        document.getElementById('semaphoreGameProgress').textContent = `Mot : ${progress}`;
+    }
+
+    let semaphoreTimerInterval = null;
+
+    function semaphoreUpdatePerWordTimer() {
+        const timerEl = document.getElementById('semaphoreGameTimer');
+        if (!semaphoreGameState || semaphoreGameState.endTime) return;
+        let now = Date.now();
+        let t = (now - semaphoreGameState.motStart) / 1000;
+        timerEl.textContent = `⏱ ${ t.toFixed(2) } s`;
+    }
+
+    function semaphoreStartTimer() {
+        if (semaphoreTimerInterval) clearInterval(semaphoreTimerInterval);
+        function update() {
+            semaphoreUpdatePerWordTimer();
+        }
+        update();
+        semaphoreTimerInterval = setInterval(update, 60);
+    }
+
+    function semaphoreGameFin() {
+        semaphoreGameState.endTime = Date.now();
+        if (semaphoreTimerInterval) clearInterval(semaphoreTimerInterval);
+        semaphoreShowScore();
+        const total = ((semaphoreGameState.endTime - semaphoreGameState.startTime)/1000);
+        const average = total / semaphoreGameState.mots.length;
+
+        let html = `<div style="font-size:18px;">
+        <b>Score : <span style="color:#19d853">${semaphoreGameState.found} / ${semaphoreGameState.mots.length}</span></b><br>
+        Temps total : <b style="color:#36ddad">${total.toFixed(2)} s</b><br>
+        Moyenne : <b style="color:#36ddad">${average.toFixed(2)} s / mot</b>
+        <br>
+        <table class="semaphore-recap-table">
+        <tr>
+            <th>#</th>
+            <th>Mot à deviner</th>
+            <th>Temps (s)</th>
+        </tr>
+        ${
+            semaphoreGameState.mots.map((mot, i) => `
+                <tr>
+                    <td>${i+1}</td>
+                    <td>${mot}</td>
+                    <td class="time">${ (semaphoreGameState.perWordTimes[i]||0).toFixed(2) }</td>
+                </tr>
+            `).join("")
+        }
+        </table>
+        </div>
+    `;
+        document.getElementById('semaphoreScoreRecap').innerHTML = html;
+    }
+
+    function semaphoreGameCheck() {
+        if (!semaphoreGameState) return;
+        const guess = document.getElementById('semaphoreGameGuess').value.trim().toLowerCase();
+        const resultDiv = document.getElementById('semaphoreGameResult');
+        const currentWord = semaphoreGameState.mots[semaphoreGameState.current];
+
+        if (!guess) {
+            resultDiv.textContent = "Écris ta proposition !";
+            resultDiv.className = "semaphore-game-result error";
+            return;
+        }
+
+        semaphoreGameState.perWordGuesses[semaphoreGameState.current] = guess;
+        const now = Date.now();
+        semaphoreGameState.perWordTimes[semaphoreGameState.current] = ((now - semaphoreGameState.motStart) / 1000);
+
+        if (guess === currentWord) {
+            resultDiv.textContent = "Bravo ! Bonne réponse 🎉";
+            resultDiv.className = "semaphore-game-result success";
+            semaphoreGameState.found++;
+
+            setTimeout(() => {
+                semaphoreGameNext();
+            }, 650);
+
+        } else {
+            resultDiv.textContent = `Raté ! Réessaie.`;
+            resultDiv.className = "semaphore-game-result error";
+        }
+    }
+
+    function semaphoreGameNext() {
+        semaphoreGameState.current++;
+        if (semaphoreGameState.current < semaphoreGameState.mots.length) {
+            semaphoreGameState.motStart = Date.now();
+            semaphoreRenderMot();
+            semaphoreUpdateProgress();
+        } else {
+            semaphoreGameFin();
+        }
+    }
+
+
 // Gestion du setup page (choix du nombre de mots)
     window.addEventListener("DOMContentLoaded", () => {
         if (document.getElementById("jeu-morse-setup")) {
@@ -639,6 +801,36 @@
             // Pour éviter ancienne interface : supprimer le bouton "Nouveau mot" s'il est là
             const old = document.getElementById('morseGameNew');
             if (old) old.style.display = 'none';
+        }
+
+        if (document.getElementById("jeu-semaphore-setup")) {
+            const radios = document.querySelectorAll('input[name="nbMotsSemaphore"]');
+            const customInput = document.getElementById('nbMotsCustomSemaphore');
+            radios.forEach(radio => {
+                radio.onchange = () => {
+                    if (radio.value === "custom") {
+                        customInput.disabled = false;
+                        customInput.focus();
+                    } else { customInput.disabled = true; }
+                };
+            });
+
+            document.getElementById('semaphoreStartBtn').onclick = () => {
+                let nb = 1;
+                const selected = Array.from(radios).find(r => r.checked);
+                if (selected.value === "custom") {
+                    nb = Math.max(1, parseInt(customInput.value) || 1);
+                } else {
+                    nb = parseInt(selected.value);
+                }
+                startSemaphoreGame(nb);
+            }
+            semaphoreShowSetup();
+
+            document.getElementById('semaphoreGameBtn').onclick = semaphoreGameCheck;
+            document.getElementById('semaphoreGameGuess').onkeyup = (e) => {
+                if (e.key === "Enter") semaphoreGameCheck();
+            };
         }
     });
 
